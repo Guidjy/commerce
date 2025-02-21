@@ -1,0 +1,17 @@
+body {
+    padding: 10px;
+}
+
+
+#listing_card {
+    height: 300px;
+
+    .col-6 {
+        height: 100%;
+        img {
+            height: 100%;
+            max-width: 100%;
+        }
+    }
+
+}

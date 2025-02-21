@@ -1,0 +1,84 @@
+{% extends "auctions/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block body %}
+    <div class="container my-5">
+        <div class="row">
+            <div class="col">
+                <h1>Listing: {{ listing.title }}</h1>
+                <!--Close auction-->
+                {% if user == listing.lister %}
+                    <a href="#">
+                        Close Auction
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row p-4 mb-4 bg-light rounded">
+            <div class="col">
+                <img src="{{ listing.image }}" alt="{{ listing.title }}">
+            </div>
+            <div class="col">
+                <div class="row mb-5">
+                    <div class="col">
+                        <p class="fs-2">{{ listing.description }}</p>
+                        <p class="fs-4 lead">Category: {{ listing.category|default_if_none:"No category listed" }}</p>
+                        <p class="fs-4 lead">Listed by: {{ listing.lister }}</p>
+                        <p class="fs-6 lead">Posted on: {{ listing.creation_date|date:"F j, Y, g:i A" }}</p>
+                    </div>
+                </div>
+                <div class="row bg-white rounded mt-5">
+                    <div class="col p-4">
+                        <h1>${{ listing.price|floatformat:2 }}</h1>
+                        {% if user.is_authenticated %}
+                            <form action="{% url 'listing' listing.pk %}" method="post">
+                                {% csrf_token %}
+                                {{ bid_form|crispy }}
+                                <button name="bid_submit" class="btn btn-primary" type="submit">Place Bid</button>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-warning my-5" role="alert">
+                                Please Log in to place a bid 
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="row">
+            <div class="col">
+                <a class="btn btn-secondary" href="#">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                    </svg> |
+                    Add to watchlist
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        <div class="row mt-5">
+            <div class="col">
+                {% if user.is_authenticated %}
+                    <form action="#" method="post">
+                        {% csrf_token %}
+                        {{ comment_form|crispy }}
+                        <button name="comment_submit" class="btn btn-primary mb-3" type="submit">Send Comment</button>
+                    </form>
+                {% endif %}
+                <h2>Comments</h2>
+                {% for comment in comments %}
+                    <div class="border-top p-2 my-2">
+                        <p class="fs-4"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                          </svg> {{ comment.commenter }}
+                        </p>
+                        <p class="fs-5 ms-4">{{ comment.comment }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+
+    <div class="container-fluid">
+        {% for listing in listings %}
+            <div id="listing_card" class="row justify-content-start border rounded my-4">
+                <div class="col-6 col-lg-3 d-flex justify-content-center">
+                    <img src="{{ listing.image|default:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8FHDtL16uXHSIgXb0v_OSsi_O0RI0oh_Rdw&s' }}" alt="{{ listing.title }}">
+                </div>
+                <div class="col-6 col-lg-9 py-3">
+                    <a class="fs-2" href="{% url 'listing' listing.pk %}">{{ listing.title }}</a>
+                    <h4><strong>Price:</strong> ${{ listing.price|floatformat:2 }}</h4>
+                    {% if listing.description %}
+                        <p class="fs-5">{{ listing.description }}</p>
+                    {% endif %}
+                    <p class="fw-light fs-6">Created {{ listing.creation_date|date:"F j, Y g:i A" }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
