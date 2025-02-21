@@ -1,10 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.db.models import Max
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import User, Listing, Bid, Comment
+from .models import User, Listing, Bid, Comment, Category
 from .forms import CreateListingForm, PlaceBidForm, CommentForm
 
 
@@ -65,6 +66,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
+@login_required
 def create_listing(request):
     if request.method == 'POST':
         form = CreateListingForm(request.POST)
@@ -82,8 +84,11 @@ def create_listing(request):
 def listing(request, listing_pk):
     if request.method == 'POST':
         if 'bid_submit' in request.POST:
-            # submit bid
-            pass
+            new_bid = PlaceBidForm(request.POST)
+            if new_bid.is_valid():
+                print('yur')
+            
+            
             
         elif 'comment_submit' in request.POST:
             # submit comment
@@ -108,3 +113,28 @@ def listing(request, listing_pk):
             'bid_form': PlaceBidForm()
             })
     
+
+@login_required
+def watchlist(request):
+    if request.method == 'POST': 
+        listing = Listing.objects.get(id=request.POST['listing_pk'])
+        if listing not in request.user.watchlist.all():
+            request.user.watchlist.add(listing)
+        else:
+            request.user.watchlist.remove(listing)
+        
+        return HttpResponseRedirect(reverse('watchlist'))
+
+    else:
+        watchlist = request.user.watchlist.all()
+        return render(request, 'auctions/watchlist.html', {'watchlist': watchlist})
+    
+
+def category(request, category_pk):
+    category = Category.objects.get(category=category_pk)
+    listings = Listing.objects.filter(category=category)
+    print(listings)
+    return render(request, 'auctions/category.html', {
+        'category': category,
+        'listings': listings
+    })

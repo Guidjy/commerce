@@ -1,10 +1,10 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+    <h2>Watchlist</h2>
 
     <div class="container">
-        {% for listing in listings %}
+        {% for listing in watchlist %}
             <div id="listing_card" class="row justify-content-start border rounded my-4">
                 <div class="col-6 col-lg-3 d-flex justify-content-center">
                     <img src="{{ listing.image|default:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8FHDtL16uXHSIgXb0v_OSsi_O0RI0oh_Rdw&s' }}" alt="{{ listing.title }}">

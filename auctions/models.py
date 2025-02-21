@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -30,7 +31,9 @@ class Listing(models.Model):
 
 
 class Bid(models.Model):
-    price = models.FloatField()
+    price = models.FloatField(validators=[
+        MinValueValidator(0.01)
+    ])
     bidder = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='bids')
     

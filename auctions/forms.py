@@ -13,6 +13,7 @@ class PlaceBidForm(ModelForm):
     class Meta:
         model = Bid
         fields = ['price']
+
         
 
 class CommentForm(ModelForm):
