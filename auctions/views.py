@@ -1,9 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.db.models import Max
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from .models import User, Listing, Bid, Comment, Category
 from .forms import CreateListingForm, PlaceBidForm, CommentForm
@@ -82,29 +83,45 @@ def create_listing(request):
     
 
 def listing(request, listing_pk):
+    listing = Listing.objects.get(pk=listing_pk)
+    
     if request.method == 'POST':
+        # place bid
         if 'bid_submit' in request.POST:
-            new_bid = PlaceBidForm(request.POST)
-            if new_bid.is_valid():
-                print('yur')
+            bid_form = PlaceBidForm(request.POST)
+            if bid_form.is_valid():
+                new_bid = bid_form.save(commit=False)
+                if new_bid.price > listing.price:
+                    listing.price = new_bid.price
+                    listing.bids_placed += 1
+                    new_bid.bidder = request.user
+                    new_bid.listing = listing
+                    new_bid.save()
+                    listing.save()
+                else:
+                    messages.warning(request, 'New bid must be higher than the starting_price/current highest bid')
+                return redirect('listing', listing_pk=listing_pk)
+                                                
+        # close auction
+        if 'close_auction_submit' in request.POST:
             
-            
-            
-        elif 'comment_submit' in request.POST:
-            # submit comment
-            pass
+            return HttpResponse('0-0')
         
-        return HttpResponse('0-0')
+        
+        # say winner
+        
+        # make comment
+        if 'comment_submit' in request.POST:
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                new_comment = comment_form.save(commit=False)
+                new_comment.commenter = request.user
+                new_comment.listing = listing
+                new_comment.save()
+                return HttpResponseRedirect(reverse('listing', kwargs={'listing_pk': listing_pk}))
         
     else:
-        listing = Listing.objects.get(pk=listing_pk)
         comments = Comment.objects.filter(listing=listing)
-        
-        #bids = Bid.objects.filter(listing=listing)
-        #highest_bid = bids.aggregate(Max('price'))  # returns {'price__max': Decimal('xx.xx')}
-        #highest_bid = highest_bid['price__max']
-        #if highest_bid == None:
-        #    highest_bid = listing.price
 
         return render(request, 'auctions/listing.html', {
             'listing': listing,

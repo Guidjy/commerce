@@ -2,21 +2,41 @@
 {% load crispy_forms_tags %}
 
 {% block body %}
+    <div class="container-fluid">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-warning text-center my-5" role="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                        <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                      </svg>
+                       {{ message }} 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                        <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                    </svg>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
     <div class="container my-5">
         <div class="row">
             <div class="col">
                 <h1>Listing: {{ listing.title }}</h1>
                 <!--Close auction-->
                 {% if user == listing.lister %}
-                    <a href="#">
-                        Close Auction
-                    </a>
+                    <form action="{% url 'listing' listing.pk %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="listing_pk" value="{{ listing.pk }}">
+                        <button name="close_auction_submit" class="badge bg-danger" type="submit">Close auction</button>
+                    </form>
                 {% endif %}
             </div>
         </div>
-        <div class="row p-4 mb-4 bg-light rounded">
+        <div id="#listing-card" class="row p-4 mb-4 bg-light rounded">
             <div class="col">
                 <img src="{{ listing.image }}" alt="{{ listing.title }}">
+                <p class="fs-6 lead">Bid(s) placed: {{ listing.bids_placed }}</p>
             </div>
             <div class="col">
                 <div class="row mb-5">
@@ -29,6 +49,7 @@
                 </div>
                 <div class="row bg-white rounded mt-5">
                     <div class="col p-4">
+                        <!--bid form-->
                         <h1>${{ listing.price|floatformat:2 }}</h1>
                         {% if user.is_authenticated %}
                             <form action="{% url 'listing' listing.pk %}" method="post">
@@ -45,29 +66,39 @@
                 </div>
             </div>
         </div>
-        {% if user.is_authenticated %}
         <div class="row">
             <div class="col">
+                <!--watchlist-->
                 {% if user.is_authenticated %}
                     <form action="{% url 'watchlist' %}" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="listing_pk" value="{{ listing.pk }}">
-                        <button name="add_to_watchlist" class="btn btn-secondary" type="submit">
+                        {% if listing in user.watchlist.all %}
+                            <button name="add_to_watchlist" class="btn btn-danger" type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                                </svg> |
+                                Remove from watchlist
+                            </button>
+                        {% else %}
+                        <button name="add_to_watchlist" class="btn btn-success" type="submit">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
                                 <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
                                 <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
                             </svg> |
                             Add to watchlist
                         </button>
+                        {% endif %}
                     </form>
                 {% endif %}
             </div>
         </div>
-        {% endif %}
         <div class="row mt-5">
             <div class="col">
+                <!--comment-->
                 {% if user.is_authenticated %}
-                    <form action="#" method="post">
+                    <form action="{% url 'listing' listing.pk %}" method="post">
                         {% csrf_token %}
                         {{ comment_form|crispy }}
                         <button name="comment_submit" class="btn btn-primary mb-3" type="submit">Send Comment</button>
