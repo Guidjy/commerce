@@ -24,7 +24,7 @@
             <div class="col">
                 <h1>Listing: {{ listing.title }}</h1>
                 <!--Close auction-->
-                {% if user == listing.lister %}
+                {% if user == listing.lister and list.open_status %}
                     <form action="{% url 'listing' listing.pk %}" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="listing_pk" value="{{ listing.pk }}">
@@ -51,16 +51,28 @@
                     <div class="col p-4">
                         <!--bid form-->
                         <h1>${{ listing.price|floatformat:2 }}</h1>
-                        {% if user.is_authenticated %}
-                            <form action="{% url 'listing' listing.pk %}" method="post">
-                                {% csrf_token %}
-                                {{ bid_form|crispy }}
-                                <button name="bid_submit" class="btn btn-primary" type="submit">Place Bid</button>
-                            </form>
+                        {% if listing.winner %}
+                            {% if listing.winner == user %}
+                                <div class="alert alert-success my-5" role="alert">
+                                    Congratulations, you have won this auction!
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning my-5" role="alert">
+                                    This auction has been closed
+                                </div>
+                            {% endif %}
                         {% else %}
-                            <div class="alert alert-warning my-5" role="alert">
-                                Please Log in to place a bid 
-                            </div>
+                            {% if user.is_authenticated %}
+                                <form action="{% url 'listing' listing.pk %}" method="post">
+                                    {% csrf_token %}
+                                    {{ bid_form|crispy }}
+                                    <button name="bid_submit" class="btn btn-primary" type="submit">Place Bid</button>
+                                </form>
+                            {% else %}
+                                <div class="alert alert-warning my-5" role="alert">
+                                    Please Log in to place a bid 
+                                </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>

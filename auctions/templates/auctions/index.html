@@ -16,7 +16,9 @@
                         <p class="fs-5">{{ listing.description }}</p>
                     {% endif %}
                     <p class="fw-light fs-6">Created {{ listing.creation_date|date:"F j, Y g:i A" }}</p>
-                    <span class="badge bg-secondary"> {{ listing.category }} </span>
+                    <a href="{% url 'category' listing.category %}">
+                        <span class="badge bg-secondary"> {{ listing.category }} </span>
+                    </a>
                 </div>
             </div>
         {% endfor %}

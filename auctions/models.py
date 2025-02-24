@@ -24,7 +24,8 @@ class Listing(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     bids_placed = models.IntegerField(default=0)
     open_status = models.BooleanField(default=True)
-    lister = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings')
+    lister = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings_created')
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings_won', null=True, blank=True)
     
     def __str__(self):
         return f'\"{self.title}\" posted by {self.lister}'

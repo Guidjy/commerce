@@ -11,7 +11,7 @@ from .forms import CreateListingForm, PlaceBidForm, CommentForm
 
 
 def index(request):
-    listings = Listing.objects.all()
+    listings = Listing.objects.all().order_by('-category')
     return render(request, "auctions/index.html", {'listings': listings})
 
 
@@ -75,7 +75,7 @@ def create_listing(request):
             new_listing = form.save(commit=False)
             new_listing.lister = request.user
             new_listing.save()
-            return HttpResponseRedirect(reverse('index'))
+            return redirect('index')
     
     else:
         form = CreateListingForm()
@@ -104,11 +104,12 @@ def listing(request, listing_pk):
                                                 
         # close auction
         if 'close_auction_submit' in request.POST:
-            
-            return HttpResponse('0-0')
-        
-        
-        # say winner
+            bids = Bid.objects.filter(listing=listing)
+            highest_bid = bids.last()
+            listing.winner = highest_bid.bidder
+            listing.open_status = False
+            listing.save()
+            return redirect('listing', listing_pk=listing_pk)
         
         # make comment
         if 'comment_submit' in request.POST:
@@ -118,7 +119,7 @@ def listing(request, listing_pk):
                 new_comment.commenter = request.user
                 new_comment.listing = listing
                 new_comment.save()
-                return HttpResponseRedirect(reverse('listing', kwargs={'listing_pk': listing_pk}))
+                return redirect('listing', listing_pk=listing_pk)
         
     else:
         comments = Comment.objects.filter(listing=listing)
@@ -140,7 +141,7 @@ def watchlist(request):
         else:
             request.user.watchlist.remove(listing)
         
-        return HttpResponseRedirect(reverse('watchlist'))
+        return redirect('watchlist')
 
     else:
         watchlist = request.user.watchlist.all()
